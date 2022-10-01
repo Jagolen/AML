@@ -12,6 +12,7 @@ def t_to_s(t, A): #Function to get s1,s2|t,y with t as a given value
     std_s_matrix = np.linalg.inv(np.linalg.inv(std_s_matrix_old) + (A.reshape(-1, 1) * (1/std_t)) @ A)
     mu_s_vector = std_s_matrix@(np.linalg.inv(std_s_matrix_old) @ mu_s_vector + A.reshape(-1, 1) * (1/std_t)*t)
     mu_s_transpose = mu_s_vector.reshape(1, -1)[0]
+    print(mu_s_vector)
     return np.random.multivariate_normal(mu_s_transpose, std_s_matrix)
 
 
@@ -22,7 +23,7 @@ std_s_matrix = np.array([[std_s**2, 0], [0, std_s**2]])
 A = np.array([[1, -1]])
 std_t = 3
 
-Iters = 50
+Iters = 100
 All_S = np.zeros((Iters, 2))
 All_t = np.zeros(Iters)
 
@@ -31,6 +32,16 @@ All_S[0] = [np.random.normal(loc=mu_s, scale = std_s), np.random.normal(loc=mu_s
 for i in range(Iters-1):
     All_t[i] = s_to_t(All_S[0,0], All_S[0,1], std_t)
     All_S[i+1] = t_to_s(All_t[i], A)
+
+x = [i for i in range(Iters)]
+y1 = [All_S[i][0] for i in range(Iters)]
+y2 = [All_S[i][1] for i in range(Iters)]
+
+plt.plot(x,y1)
+plt.plot(x,y2)
+plt.show()
+
+
 
 
 
