@@ -79,6 +79,17 @@ for iteration in range(nr_matches):
         if team_data[j].name == team_2_name:
             team2 = team_data[j]
     
+    skill_dif = team1.name - team2.name
+    skill_sign = np.sign(skill_dif)
+
+    if score == skill_sign:
+        std_t = abs(1/true_score)
+    else:
+        std_t = abs(true_score)
+    
+    if std_t == 0:
+        std_t = 1
+    
 
     #Set up µ-vector and covariance matrix
     mu_s_vector = np.array([[team1.mu], [team2.mu]])
