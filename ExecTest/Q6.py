@@ -48,7 +48,7 @@ for i in team_list:
     team_data.append(team(1,4,i,0))
 
 Iters = 1000 #Iterations
-ab = 100 #After burnout
+ab = 20 #After burnout
 A = np.array([[1, -1]]) # A-vector in the calculations
 
 #Main loop
