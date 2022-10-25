@@ -55,8 +55,8 @@ A = np.array([[1, -1]]) # A-vector in the calculations
 nr_matches = len(input_data["team1"])
 for iteration in range(nr_matches):
     print(f"Calculating match {iteration} of {nr_matches}")
-    #i = iteration # Doing matches in sequence
-    i = nr_matches-1-iteration # doing matches in reverse
+    i = iteration # Doing matches in sequence
+    #i = nr_matches-1-iteration # doing matches in reverse
     #Get the score, if score is 0, the match is ignored
     score = input_data["score1"][i] - input_data["score2"][i]
     if score == 0:

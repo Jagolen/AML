@@ -25,7 +25,7 @@ def t_to_s(t, A, std_t,std_s_matrix, mu_s_vector): #Function to get s1,s2|t,y wi
     std_s_matrix = np.linalg.inv(np.linalg.inv(std_s_matrix_old) + (A.reshape(-1, 1) * (1/std_t)) @ A)
     mu_s_vector = std_s_matrix@(np.linalg.inv(std_s_matrix_old) @ mu_s_vector + A.reshape(-1, 1) * (1/std_t)*t)
     mu_s_transpose = mu_s_vector.reshape(1, -1)[0]
-    return np.random.multivariate_normal(mu_s_transpose, std_s_matrix), mu_s_vector, std_s_matrix
+    return np.random.multivariate_normal(mu_s_transpose, std_s_matrix)
 
 std_t = 5 # starting σ for t
 
@@ -49,8 +49,8 @@ team_data = []
 for i in team_list:
     team_data.append(team(1,4,i,0))
 
-Iters = 2000 #Iterations
-ab = 500 #After burnout
+Iters = 1000 #Iterations
+ab = 20 #After burnout
 A = np.array([[1, -1]]) # A-vector in the calculations
 
 #Main loop
@@ -93,7 +93,7 @@ for iteration in range(nr_matches):
     # We calculate t, then s, and repeat for as many times as the iterations
     for j in range(Iters-1):
         All_t[j] = s_to_t(All_S[j,0], All_S[j,1], std_t, score)
-        All_S[j+1], mu_s_vector, std_s_matrix = t_to_s(All_t[j], A, std_t,std_s_matrix, mu_s_vector)
+        All_S[j+1] = t_to_s(All_t[j], A, std_t,std_s_matrix, mu_s_vector)
 
     #Getting s1 and s2 values
     y1 = [All_S[j][0] for j in range(ab,Iters)]
@@ -126,7 +126,7 @@ team_data.sort(key=lambda team: team.skill, reverse=True)
 
 print("TEAM SKILLS AND RANKINGS:")
 for i in range(len(team_data)):
-    print(f"{i+1}. {team_data[i].name}: {round(team_data[i].skill, 2)}")
+    print(f"{i+1}. {team_data[i].name}: Skill = {round(team_data[i].skill, 2)}, µ = {round(team_data[i].mu, 2)}, sig = {round(team_data[i].var, 2)}")
 
     
 
