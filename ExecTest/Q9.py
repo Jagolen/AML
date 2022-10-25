@@ -4,77 +4,15 @@ from scipy.stats import truncnorm
 import matplotlib.pyplot as plt
 import scipy.stats as stats
 
-def s_to_t(s1, s2, std_t): #Function to get t|s1,s2,y with s1, s2 as given values
-    return truncnorm.rvs(0 - (s1-s2)/std_t, (np.inf - (s1-s2)/std_t), loc = (s1-s2), scale = std_t)
-
-def t_to_s(t, mu_s_vector, std_s_matrix, A, std_t): #Function to get s1,s2|t,y with t as a given value
-    std_s_matrix_old = std_s_matrix
-    std_s_matrix = np.linalg.inv(np.linalg.inv(std_s_matrix_old) + (A.reshape(-1, 1) * (1/std_t)) @ A)
-    mu_s_vector = std_s_matrix@(np.linalg.inv(std_s_matrix_old) @ mu_s_vector + A.reshape(-1, 1) * (1/std_t)*t)
-    mu_s_transpose = mu_s_vector.reshape(1, -1)[0]
-    return np.random.multivariate_normal(mu_s_transpose, std_s_matrix)
-
 def main():
     # initial
-    mean_1 = 1
-    var_1 = 4
-    mean_2 = 1
-    var_2 = 4
-    beta = 5
+    mean_1 = 0
+    var_1 = 0.7
+    mean_2 = 0
+    var_2 = 0.7
+    beta = 2
     y = 1
 
-    mu_s_vector = np.array([[mean_1], [mean_2]])
-    std_s_matrix = np.array([[var_1, 0], [0, var_2]])
-    A = np.array([[1, -1]]) # A-vector in the calculations
-
-    Iters = 2000 #iterations
-    ab = 30 # burnout period
-
-    All_S = np.zeros((Iters, 2)) #Containing drawn S values
-    All_t = np.zeros(Iters) #Containing drawn t values
-
-    # Matrices where the s1 and s2 random values are stored as well as the µ-values (in All_Mu_S)
-    All_S[0] = [np.random.normal(loc=mean_1, scale = var_1), np.random.normal(loc=mean_2, scale = var_2)]
-
-    # We calculate t, then s, and repeat for as many times as the iterations
-    for i in range(Iters-1):
-        All_t[i] = s_to_t(All_S[i,0], All_S[i,1], beta)
-        All_S[i+1] = t_to_s(All_t[i], mu_s_vector, std_s_matrix, A, beta)
-
-    # Result vectors, x stores iterations, y stores s1 and s2, w stores µ1 and µ2
-    x = [i for i in range(ab,Iters)]
-    y1 = [All_S[i][0] for i in range(ab,Iters)]
-    y2 = [All_S[i][1] for i in range(ab,Iters)]
-    #Finding mean
-    mu_S1 = np.mean(y1)
-    mu_S2 = np.mean(y2)
-
-    #Finding the Covariance matrix
-    co_11 = 0
-    co_121 = 0
-    co_22 = 0
-
-    for i in range(len(y1)):
-        co_11 += (y1[i]-mu_S1)**2
-        co_22 += (y2[i]-mu_S2)**2
-        co_121 += (y1[i]-mu_S1)*(y2[i]-mu_S2)
-
-    co_11 /= len(y1)-1
-    co_121 /= len(y1)-1
-    co_22 /= len(y2)-1
-    samples_drawn = Iters - ab
-
-    # Putting the results into a vector (µ) and a matrix (covariance)
-    mu_vector = np.array([mu_S1, mu_S2])
-    covariance_matrix = np.array([[co_11, co_121], [co_121, co_22]])
-    # Draws samples from the original µ values and covariance matrix, the draws values from the new M values and covariance matrix
-    All_samples_drawn = np.zeros((samples_drawn, 2))
-    for i in range(samples_drawn):
-        All_samples_drawn[i] = np.random.multivariate_normal(mu_vector, covariance_matrix)
-
-    #Results are split into new s1, s2 and starting value for s1, s2
-    newy1 = [All_samples_drawn[i][0] for i in range(samples_drawn)]
-    newy2 = [All_samples_drawn[i][1] for i in range(samples_drawn)]
 
     # fc to t
     mean_fct = mean_1 - mean_2 #(np.array([1, -1])@np.array([[mean_1], [mean_2]]))[0]
@@ -117,14 +55,9 @@ def main():
     # plot
 
     # posteriors
-    x = np.linspace(-10, 10, num=1000)
-    plt.plot(x, stats.norm.pdf(x, mu_S1, co_11))
-    plt.plot(x, stats.norm.pdf(x, mu_S2, co_22))
-    plt.hist(newy1, density=1, bins=20)
-    plt.hist(newy2, density=1, bins=20)
+    x = np.linspace(-5, 5, num=1000)
     plt.plot(x, stats.norm.pdf(x, mean_s1Iy, var_s1Iy))
     plt.plot(x, stats.norm.pdf(x, mean_s2Iy, var_s2Iy))
-    plt.legend(["S1 (Gibbs)", "S2 (Gibbs)", "S1 Gibbs Histogram", "S2 Gibbs Histogram","S1 (Message)", "S2 (Message)"])
     plt.show()
     
 
