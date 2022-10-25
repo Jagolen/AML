@@ -35,8 +35,8 @@ std_s_start = np.array([[std_s**2, 0], [0, std_s**2]])
 A = np.array([[1, -1]]) # A-vector in the calculations
 std_t = 5 # σ for t
 
-Iters = 2000 #iterations
-ab = 3 # burnout period
+Iters = 1000 #iterations
+ab = 20 # burnout period
 All_S = np.zeros((Iters, 2)) #Containing drawn S values
 All_t = np.zeros(Iters) #Containing drawn t values
 
@@ -60,6 +60,7 @@ plt.plot(x,y2)
 plt.legend(["s_1", "s_2"])
 plt.xlabel("Iterations")
 plt.ylabel("s-value")
+plt.title("Generated S values from Gibbs Sampling")
 plt.show()
 
 #FINDING NEW MEAN AND CO VARIANCE FROM DRAWN S1 AND S2 FOR POSTERIOR DISTRIBUTION
@@ -139,4 +140,5 @@ axis[1].legend(['s_2', 's_2|y'])
 
 plt.xlabel("Value")
 plt.ylabel("Probability")
+plt.title("How s_1 and s_2 changes given y")
 plt.show()
