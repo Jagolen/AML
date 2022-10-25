@@ -68,13 +68,15 @@ def gibbs(s1, s2, t, sigma_A, At, sigma_t, y, sig_mat, mu_mat, N):
         s2[i+1] = draw_val(sigma_A, mu_ab, s1[i+1], 2)
         t[i+1] = trunc(s1[i+1], s2[i+1], sigma_t, y)
 
-def prediction(mu1, mu2):
-    guess = mu1 - mu2
-    if guess == 0:
-        guess = 1
-    else:
-        guess = np.sign(guess)
-    return guess
+def prediction(mu1, mu2, std1, std2, y):
+    #will try to predict N simulations of given match and return how many are correct
+    N=100
+    t=np.zeros(N)
+    mut=np.random.normal(mu1,std1,N)-np.random.normal(mu2,std2,N)
+    for i in range(N):
+        t[i]=np.random.normal(mut[i],5)
+    accuracy=sum(y==np.sign(t))/N
+    return accuracy
 
 
 def rank_predictor_guess(teams, outcome, team1, team2, teams_mean, teams_var, burn_in, n_samples):
@@ -85,7 +87,7 @@ def rank_predictor_guess(teams, outcome, team1, team2, teams_mean, teams_var, bu
     A = np.array([1, -1]) 
     At = np.array([[1],[-1]])
     AtA = A*At
-    correct_guess, total_games = 0, 0
+    accuracy, total_games = 0, 0
 
     # Loop over all games
     for game in range(n_games):
@@ -104,10 +106,8 @@ def rank_predictor_guess(teams, outcome, team1, team2, teams_mean, teams_var, bu
             
             # Calculate the amount of correct guesses of result
             total_games = total_games + 1
-            guess = prediction(mu_1, mu_2)
+            accuracy += prediction(mu_1, mu_2, sigma_1, sigma_2, y)
                 
-            if guess == y:
-                correct_guess = correct_guess + 1 # guess is right
             
 
             # Get some necessary matrices
@@ -127,13 +127,13 @@ def rank_predictor_guess(teams, outcome, team1, team2, teams_mean, teams_var, bu
             teams_var[home_team] = np.var(s1[burn_in:])
             teams_var[away_team] = np.var(s2[burn_in:])
     
-    return correct_guess/total_games # return r
+    return accuracy/total_games # return r
 
 
 
 def main():
     column_names = ['date', 'time', 'team1', 'team2', 'score1', 'score2']
-    data = pd.read_csv("SerieA.csv", names=column_names, skiprows=1)
+    data = pd.read_csv("ExecTest/SerieA.csv", names=column_names, skiprows=1)
 
     team1 = np.array(data.team1.tolist())
     team2 = np.array(data.team2.tolist())
